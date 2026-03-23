@@ -7,7 +7,7 @@ It employs **Design Choice 1: Chained Multi-outputs** to cascade customer servic
 
 ## 🏗️ Architecture Design Principles
 This project implements strong software engineering principles for machine learning:
-1. **Abstraction**: The `BaseModel` handles a uniform interface (`train()`, `predict()`, `print_results()`) so the coordinator script doesn't need to know the inner workings of `ChainedRandomForest`.
+1. **Abstraction**: The `BaseModel` handles a uniform interface (`train()`, `predict()`, `print_results()`) so the coordinator know the inner workings of `ChainedRandomForest`.
 2. **Encapsulation**: The `Data` class hides complex test/train split logic and the concatenation of chained labels (e.g., `Type 2 + Type 3`).
 3. **Modularity**: Data preprocessing, embedding (TF-IDF), model definitions, and orchestration are entirely decoupled into separate specific files.
 
