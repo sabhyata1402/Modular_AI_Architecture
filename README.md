@@ -13,7 +13,7 @@ This project implements strong software engineering principles for machine learn
 
 ## 🗂️ Project Structure
 ```text
-skeleton/
+Code/
 ├── main.py                    # The central controller and entry point
 ├── Config.py                  # Global constant mapping
 ├── preprocess.py              # Data deduplication, cleaning, and text translation via Google Translate
