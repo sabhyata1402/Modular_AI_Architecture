@@ -11,9 +11,22 @@ np.random.seed(seed)
 class Data():
     def __init__(self,
                  X: np.ndarray,
-                 df: pd.DataFrame) -> None:
-                 # This method will create the model for data
-                 #This will be performed in second activity
+                 df: pd.DataFrame,
+                 target_series: pd.Series) -> None:
+        
+        # Remove low frequency classes (e.g. less than 5 instances) to allow stratified splitting
+        counts = target_series.value_counts()
+        valid_classes = counts[counts >= 5].index
+        
+        valid_indices = target_series.isin(valid_classes)
+        self.embeddings = X[valid_indices]
+        self.y = target_series[valid_indices].values
+        self.df = df[valid_indices]
+        
+        # Train-test split
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+            self.embeddings, self.y, test_size=0.2, random_state=seed, stratify=self.y
+        )
 
 
     def get_type(self):
