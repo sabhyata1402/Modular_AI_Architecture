@@ -6,7 +6,7 @@ from model.base import BaseModel
 import random
 
 # Set seeds
-seed = 33
+seed = 0
 random.seed(seed)
 np.random.seed(seed)
 
