@@ -1,70 +1,64 @@
+# Single label RF classifier for Type 2
+# Seves as baseline model
+# 
+# Inherits from BaseModel, implements train/predict/print_results
+
 import numpy as np
 import pandas as pd
-from model.base import BaseModel
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, confusion_matrix
-from numpy import *
+from sklearn.metrics import classification_report
+from model.base import BaseModel
 import random
 
-# Global configurations for model evaluation and reproducibility
-num_folds = 0
+# Seeds
 seed = 0
-
-# Fix random seeds for reproducibility
-np.random.seed(seed)
 random.seed(seed)
+np.random.seed(seed)
 
-# Single-label Random Forest classifier for Type 2 classification.
-    # Inherits from BaseModel (Abstraction).
-    # The main controller interacts with this model ONLY through the
-    # three abstract methods: train(), predict(), print_results().
+# Baseline classifier for Type 2
+# Used as the baseline to compare against ChainedModel results
 class RandomForest(BaseModel):
-   
-    def __init__(self,
-                 model_name: str,
-                 embeddings: np.ndarray,
-                 y: np.ndarray) -> None:
-        """
-        Initializes the model metadata, inputs, and the Scikit-Learn estimator.
-        """
+
+    # Initialise RF classifier
+    def __init__(self, model_name: str) -> None:
+    
         super(RandomForest, self).__init__()
-        self.model_name = model_name
-        self.embeddings = embeddings
-        self.y = y
-        
-        # Initialize Scikit-Learn's Random Forest classifier:
-        self.mdl = RandomForestClassifier(n_estimators=1000, random_state=seed, class_weight='balanced_subsample')
+
+        self.model_name  = model_name
         self.predictions = None
+
+        # n_estimators - 1000 decision trees for stable predictions
+        # class_weight='balanced_subsample' - handles class imbalance
+        self.mdl = RandomForestClassifier(
+            n_estimators=1000,
+            random_state=seed,
+            class_weight='balanced_subsample'
+        )
+
         self.data_transform()
 
-    # Train the Random Forest on the Type 2 labels from the Data object.
-
-        # Uses:
-        #     data.X_train — TF-IDF feature matrix (training rows)
-        #     data.y_train — Type 2 class labels for training rows
-
-        # The fitted model is stored back on self.mdl so predict() can use it.
-        
-    def train(self, data) -> None:
-        self.mdl = self.mdl.fit(data.X_train, data.y_train)
-
-    # Generate Type 2 predictions on the test set from the Data object.
-    def predict(self, data):
-        """
-        Executes model inference on the testing feature set (X_test) and caches predictions.
-        """
-        predictions = self.mdl.predict(data.X_test)
-        self.predictions = predictions
-
-    # Print a full classification report comparing predictions vs true labels.
-    def print_results(self, data):
-        """
-        Evaluates the cached predictions against the ground truth labels (data.y_test).
-        Outputs a comprehensive classification report (precision, recall, f1-score, support).
-        """
-        print(classification_report(data.y_test, self.predictions))
-
-    # Apply any data transformations required by this model.
+    # Hook for data transformations before training
+     # Not needed for RandomForest
     def data_transform(self) -> None:
         pass
 
+    # Train classifier on Type 2 labels
+    def train(self, data) -> None:
+        print(f"\n[{self.model_name}] Training on Type 2 labels...")
+        self.mdl.fit(data.X_train, data.y_train)
+        print(f"[{self.model_name}] Training is compete")
+
+    # Generate predictions on Type 2 labels
+    def predict(self, data) -> None:
+        self.predictions = self.mdl.predict(data.X_test)
+
+    # Print classification report
+    def print_results(self, data) -> None:
+        print(f"\n{'='*60}")
+        print(f" {self.model_name} — Baseline Classifier (Type 2 only)")
+        print(f"{'='*60}")
+        print(classification_report(
+            data.y_test,
+            self.predictions,
+            zero_division=0
+        ))

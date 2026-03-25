@@ -1,53 +1,99 @@
-# Multi-Label Chained AI Classification Architecture
+# Email Classification Project
 
-## 📖 Overview
-This repository contains the implementation for **CA1: Engineering and Evaluating Artificial Intelligence**. The goal of this project was to refactor an existing single-label text classification architecture into a **Multi-label Chained Classifier** using Object-Oriented and Modular AI principles.
+## Overview
 
-It employs **Design Choice 1: Chained Multi-outputs** to cascade customer service email classifications across three deepening levels of granularity (Type 2 -> Type 3 -> Type 4).
+This project implements a multi label email classification system. Built atop the
+provided skeleton file structure, the architecture was designed and extended with
+adherence to principles of modularity, encapsulation and abstraction. 
 
-## 🏗️ Architecture Design Principles
-This project implements strong software engineering principles for machine learning:
-1. **Abstraction**: The `BaseModel` handles a uniform interface (`train()`, `predict()`, `print_results()`) so the coordinator know the inner workings of `ChainedRandomForest`.
-2. **Encapsulation**: The `Data` class hides complex test/train split logic and the concatenation of chained labels (e.g., `Type 2 + Type 3`).
-3. **Modularity**: Data preprocessing, embedding (TF-IDF), model definitions, and orchestration are entirely decoupled into separate specific files.
+It classifies customer emails across three dependent label types — 
+Type 2, Type 3, and Type 4 with the Chained Multi-Output Classifier
 
-## 🗂️ Project Structure
-```text
-Code/
-├── main.py                    # The central controller and entry point
-├── Config.py                  # Global constant mapping
-├── preprocess.py              # Data deduplication, cleaning, and text translation via Google Translate
-├── embeddings.py              # Translates text into mathematical TF-IDF Vectors
-├── utils.py                   # Reusable helper functions (like execution timers)
-├── data/                      # Raw datasets (e.g., AppGallery.csv, Purchasing.csv)
-├── model/
-│   ├── base.py                # Abstract Base Class for ML models
-│   ├── randomforest.py        # Baseline ML model
-│   └── chained_randomforest.py# Custom Chained Multi-output ML model
-└── modelling/
-    ├── data_model.py          # Data Encapsulation Object
-    └── modelling.py           # Coordinator script calling the models uniformly
+
+## How It Works
+
+Messages are loaded from two datasets, AppGallery and Purchasing, they are cleaned, 
+and converted into numerical vectors using TF-IDF. Data is then grouped by Type 
+1 and passed through two classifiers:
+
+- **RandomForest (the baseline)** classifies Type 2 only
+- **ChainedRandomForest (for Design Choice 1)** — classifies all three label sets:
+  - Type 2 only (such as `Suggestion`)
+  - Type 2 + Type 3 combined (concat results - `Suggestion_Payment`)
+  - Type 2 + Type 3 + Type 4 combined (eg. `Suggestion_Payment_Subscription cancellation`)
+
+Accuracy is measured on each level. Since the labels are dependent, accuracy cannot 
+increase as the chain deepens. So if Type 2 is predicted incorrectly, the full combined 
+label is wrong regardless of Type 3 or Type 4.
+
+
+## Architecture
+
+The code is structured around the three architectural principles:
+
+**Separation of Concerns** — involves preprocessing, vectorisation, data encapsulation, 
+modelling, and orchestration each living in their own dedicated file. The `main.py` file
+only coordinates the pipeline, it contains no implementation logic
+
+**Encapsulation** — the `Data` class in `data_model.py` has all train test splits 
+and chained label arrays in one object. Every model receives this single object rather 
+than raw arrays, keeping the input format consistent across all the models
+
+**Abstraction** — `BaseModel` in `base.py` defines a common interface that every model 
+must implement. These are `train(data)`, `predict(data)`, `print_results(data)`, and 
+`data_transform()`. The modelling coordinator calls these methods without knowing which 
+model it's talking to
+
+
+## Project Structure
+```
+Code_Architecture/
+   main.py                     # Entry point, coordinats the full pipeline
+   Config.py                   # Shared constants (eg. column names, group key)
+   preprocess.py               # Data loading, deduplication, cleaning
+   embeddings.py               # TF-IDF vectorisation
+   utils.py                    # Helper utilities (sucha s time_it decorator)
+   data/
+      AppGallery.csv
+      Purchasing.csv
+   model/
+      __init__.py             # Exposes public model interface for the package
+      base.py                 # Abstract BaseModel class
+      randomforest.py         # Baseline single label classifier
+      chained_randomforest.py # Chained multi-label classifier
+   modelling/
+      data_model.py           # Data class — encapsulates all train test splits
+      modelling.py            # Runs each model through the uniform interface
 ```
 
-## 🚀 How to Run
 
-1. **Prerequisites:** You need Python 3 installed. We recommend using a `conda` environment.
-2. **Install Dependencies:**
-   Ensure you have `pandas`, `scikit-learn`, `numpy`, and `googletrans==4.0.0-rc1` installed.
-   ```bash
-   pip install pandas scikit-learn numpy googletrans==4.0.0-rc1
-   ```
-3. **Execution:**
-   Navigate your terminal into the root folder (`skeleton/`) and execute the controller:
-   ```bash
-   python main.py
-   ```
+## Setup and Running
 
-## 📊 Expected Output
-Upon running `main.py`, the system will load the data, execute TF-IDF feature extractions, and launch the models. You will see performance metric reports print to your terminal for:
-- **Baseline**: Singe-label `Type 2` only (RandomForest)
-- **Level 1**: Chained Type 2 only
-- **Level 2**: Chained concatenated `Type 2 + Type 3`
-- **Level 3**: Chained concatenated `Type 2 + Type 3 + 4`
+You will need Python 3 and the following packages:
+```
+pip install pandas scikit-learn numpy
+```
 
-*(Note: As the chained granularity deepens and adds more complex unique combinations, accuracy naturally and expectedly drops).*
+To run the pipeline, navigate to the project root (`Code_Architecture`) and execute:
+```
+python main.py
+```
+
+
+## Expected Output
+
+The output will print timing information for each pipeline step, followed by results 
+for each data group (AppGallery & Games + In-App Purchase) For each group you will see:
+
+- A baseline classification report for Type 2 only
+- A chained accuracy summary showing all three levels
+- Full classification reports per chain level
+
+Accuracy will decrease at each chain level — which is anticipated and correct behaviour, 
+and is the key result this architecture is to demonstrate
+
+
+## Team
+
+Team members include Sabhyata Kumari and Patrick Tsouganov. Both team members contributed 
+commits — see repository history for individual contributions

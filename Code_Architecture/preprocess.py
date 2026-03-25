@@ -3,8 +3,8 @@ import pandas as pd
 from Config import Config
 
 def get_input_data():
-    df1 = pd.read_csv('data/AppGallery.csv',skipinitialspace=True, encoding='latin-1') 
-    df2 = pd.read_csv('data/Purchasing.csv',skipinitialspace=True, encoding='latin-1')
+    df1 = pd.read_csv('Code_Architecture/data/AppGallery.csv',skipinitialspace=True, encoding='latin-1') 
+    df2 = pd.read_csv('Code_Architecture/data/Purchasing.csv',skipinitialspace=True, encoding='latin-1')
     df = pd.concat([df1, df2], ignore_index=True)
 
         # Convert text columns to Unicode strings to ensure consistent encoding
