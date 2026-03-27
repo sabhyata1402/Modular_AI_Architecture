@@ -2,8 +2,6 @@ import time
 import os
 import functools
 
-# Extra functionality we might need
-# EG. utilities for timing execution
 
 # Prints execution time of the function it decorates
 def time_it(func):
